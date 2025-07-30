@@ -1,0 +1,33 @@
+import { call, CallEffect, put, PutEffect, takeLatest } from 'redux-saga/effects';
+import api from '../../../shared/api/apiClient';
+import Cookies from 'js-cookie';
+import { loginSuccess, loginFailure, loginRequest } from './authSlice';
+import { LoginPayload, AuthTokens } from '../types';
+import { endpoints } from '@/shared/config/endpoints';
+
+function* loginWorker(
+  action: { payload: LoginPayload }
+): Generator<CallEffect | PutEffect<ReturnType<typeof loginSuccess | typeof loginFailure>>, void> {
+  try {
+    const formData = new FormData();
+    formData.append('email', action.payload.email);
+    formData.append('password', action.payload.password);
+
+    const response = yield call(api.post, endpoints.login, formData);
+    const data = response.data as AuthTokens;
+
+    Cookies.set('access_token', data.access_token);
+    Cookies.set('refresh_token', data.refresh_token);
+
+    yield put(loginSuccess(data));
+  } catch (err) {
+    const errorMessage =
+      (err as { response?: { data?: { message?: string }[] } })?.response?.data?.[0]?.message ||
+      'Ошибка логина';
+    yield put(loginFailure(errorMessage));
+  }
+}
+
+export function* authSaga() {
+  yield takeLatest(loginRequest, loginWorker); 
+}
