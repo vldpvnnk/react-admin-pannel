@@ -9,8 +9,6 @@ const rootReducer = combineReducers({
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-let store: Store | undefined;
-
 export function initializeStore() {
   const sagaMiddleware = createSagaMiddleware();
 
@@ -19,7 +17,6 @@ export function initializeStore() {
     applyMiddleware(sagaMiddleware)
   );
 
-  // Запускаем саги только в браузере (иначе падает на сервере)
   if (typeof window !== 'undefined') {
     sagaMiddleware.run(rootSaga);
   }

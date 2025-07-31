@@ -1,22 +1,14 @@
 import { useEffect, useState } from 'react';
 import { fetchPosts, Post } from '../../shared/api/postApi';
-import Cookies from 'js-cookie';
-import { useRouter } from 'next/navigation';
-import { Button, Table } from 'antd';
+import { Table } from 'antd';
 import { columns } from '@/app/context';
+import '@ant-design/v5-patch-for-react-19';
 
 const PostsPage = () => {
-  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-
-  const handleLogout = () => {
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
-    router.replace("/");
-  }
 
   const loadPosts = async (pageNumber: number) => {
     setLoading(true);
@@ -31,16 +23,17 @@ const PostsPage = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     loadPosts(page);
   }, [page]);
 
   return (
       <Table
-        title={() => <div>
-                    <h2 style={{textAlign: 'center'}}>Список постов</h2>
-                    <Button onClick={handleLogout}>Выйти</Button>
-        </div>
+        title={() => 
+          <div>
+            <h2 style={{textAlign: 'center'}}>Список постов</h2>
+          </div>
         }
         showHeader={true}
         columns={columns}

@@ -1,7 +1,7 @@
 'use client';
 
 import { Provider } from 'react-redux';
-import { initializeStore } from './store';
+import { initializeStore } from '../shared/store';
 import { useMemo } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {

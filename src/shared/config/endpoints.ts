@@ -1,3 +1,6 @@
 export const endpoints = {
-  login: '/auth/token-generate',
+  auth: '/auth/token-generate',
+  postsPage: '/posts',
+  loginPage: '/login',
+  listOfPosts: '/manage/posts'
 };

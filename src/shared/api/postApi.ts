@@ -1,3 +1,4 @@
+import { endpoints } from '../config/endpoints';
 import api from './apiClient';
 import Cookies from 'js-cookie';
 
@@ -26,7 +27,7 @@ export interface PaginatedPostsResponse {
 export const fetchPosts = async (page = 1): Promise<PaginatedPostsResponse> => {
   const token = Cookies.get('access_token');
 
-  const response = await api.get('/manage/posts', {
+  const response = await api.get(endpoints.listOfPosts, {
     params: { page },
     headers: {
       Authorization: `Bearer ${token}`,
