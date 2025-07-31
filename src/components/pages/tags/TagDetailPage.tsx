@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {  Spin, Descriptions, Button } from 'antd';
 import TagDetail from '@/entities/tag/types';
-import '@ant-design/v5-patch-for-react-19';
 import { viewTag } from '@/shared/api/tagApi';
 import { getTagDescriptionItems } from '@/features/utils/getTagDescriptionItems';
 

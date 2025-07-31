@@ -1,4 +1,4 @@
-import { applyMiddleware, combineReducers, createStore, Store } from 'redux';
+import { applyMiddleware, combineReducers, createStore } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { authReducer } from '@/entities/user/model/authSlice';
 import rootSaga from './rootSaga';

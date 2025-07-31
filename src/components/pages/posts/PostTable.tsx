@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { fetchPosts, Post } from '../../../shared/api/postApi';
 import { Space, Table } from 'antd';
 import { postsColumns } from '@/app/context';
-import '@ant-design/v5-patch-for-react-19';
 import { useRouter } from 'next/navigation';
 
 const PostsTable = () => {

@@ -3,24 +3,24 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {  Spin, Descriptions, Button } from 'antd';
-import { viewPost } from '@/shared/api/postApi';
-import PostDetail from '@/entities/post/types';
-import { getPostDescriptionItems } from '@/features/utils/getPostDescriptionItems';
+import { viewAuthor } from '@/shared/api/authorsApi';
+import AuthorDetail from '@/entities/author/types';
+import { getAuthorDescriptionItems } from '@/features/utils/getAuthorDescriptionItems';
 
-export default function PostDetailPage() {
+export default function AuthorsDetailPage() {
     const router = useRouter();
     const params = useParams();
     const id = params.id as string; 
 
-  const [post, setPost] = useState<PostDetail | null>(null);
+  const [author, setAuthor] = useState<AuthorDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
 
-  const fetchPost = async () => {
+  const fetchAuthor = async () => {
     try {
-      const data = await viewPost(id);
-      setPost(data);
+      const data = await viewAuthor(id);
+      setAuthor(data);
     } catch (error) {
       console.error('Ошибка при получении поста:', error);
     } finally {
@@ -28,18 +28,18 @@ useEffect(() => {
     }
   };
 
-  fetchPost();
+  fetchAuthor();
 }, [id]);
 
   if (loading) return <Spin size="large" />;
 
-  if (!post) return <div>Пост не найден</div>;
+  if (!author) return <div>Автор не найден</div>;
 
-const items = getPostDescriptionItems(post);
+const items = getAuthorDescriptionItems(author);
   return (
     <div style={{ padding: 24 }}>
-        <Button onClick={() => router.push('/posts')}>Вернуться назад</Button>
-        <h1>Детали поста</h1>
+        <Button onClick={() => router.push('/authors')}>Вернуться назад</Button>
+        <h1>Детали автора</h1>
         <Descriptions bordered column={1} items={items} />
     </div>
   );

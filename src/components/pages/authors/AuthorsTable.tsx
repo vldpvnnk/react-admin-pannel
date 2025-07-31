@@ -1,10 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Table, Spin, Alert, Space } from 'antd';
+import { Table, Spin, Alert, Space, Button, message } from 'antd';
 import { authorsColumns } from '@/app/context';
 import { useRouter } from 'next/navigation';
 import AuthorDetail from '@/entities/author/types';
-import { fetchAuthors } from '@/shared/api/authorsApi';
+import { deleteAuthor, fetchAuthors } from '@/shared/api/authorsApi';
+import { PlusOutlined } from '@ant-design/icons';
 
 const AuthorsTable = () => {
   const router = useRouter();
@@ -23,14 +24,33 @@ const AuthorsTable = () => {
 
   if (loading) return <Spin size="large" />;
   if (error) return <Alert message={error} type="error" />;
-
+  const handleDelete =  (id: string) => {
+    const request = async () => {
+        try{
+            const res = await deleteAuthor(id);
+            if (res) {
+                message.success("Автор удален!")
+            };
+        } catch (error){
+            console.error(error)
+        }
+    }
+    request();
+  }
   return (
     <Table
-      title={() => 
-        <div>
-          <h2 style={{textAlign: 'left'}}>Список авторов</h2>
-        </div>
-      } 
+        title={() => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ margin: 0 }}>Список авторов</h2>
+            <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => router.push('/authors/add')}
+            >
+                Добавить автора
+            </Button>
+            </div>
+        )}
       showHeader
       rowKey="id" 
       columns={[...authorsColumns, 
@@ -41,7 +61,7 @@ const AuthorsTable = () => {
                 <Space size='small'>
                   <a onClick={() => router.push(`/authors/detail/${record.id}`)}>Посмотреть</a>
                   <a onClick={() => router.push(`/authors/edit/${record.id}`)}>Редактировать</a>
-                  <a>Удалить</a>
+                  <a onClick={() => handleDelete(String(record.id))}>Удалить</a>
                 </Space>
           )
         }

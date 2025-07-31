@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
-
+import '@ant-design/v5-patch-for-react-19';
 const { Sider, Content } = Layout;
 
 const menuItems = [

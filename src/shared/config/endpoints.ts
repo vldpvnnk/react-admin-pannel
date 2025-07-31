@@ -7,5 +7,9 @@ export const endpoints = {
   viewPost: '/manage/posts/detail',
   listOfTags: '/manage/tags',
   detailTag: '/manage/tags/detail',
-  listOfAuthors: '/manage/authors'
+  listOfAuthors: '/manage/authors',
+  addAuthor: '/manage/authors/add',
+  detailAuthor: "/manage/authors/detail",
+  editAuthor: "/manage/authors/edit",
+  deleteAuthor: "/manage/authors/delete"
 };

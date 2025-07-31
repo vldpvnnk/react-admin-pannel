@@ -6,7 +6,6 @@ import { RootState } from '@/shared/store';
 import { loginRequest } from '@/entities/user/model/authSlice';
 import { Alert, Button, Form, Input } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import '@ant-design/v5-patch-for-react-19';
 import { useForm } from 'antd/es/form/Form';
 import { useEffect } from 'react';
 type FieldType = {
@@ -24,7 +23,7 @@ export default function LoginForm() {
     if (isAuthenticated) {
       router.push('/posts');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   const handleSubmit = (values: { email: string; password: string }) => {
     dispatch(loginRequest(values));
