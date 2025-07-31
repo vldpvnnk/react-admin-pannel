@@ -23,10 +23,9 @@ export interface PaginatedPostsResponse {
   currentPage: number;
   totalItems: number;
 }
+const token = Cookies.get('access_token');
 
 export const fetchPosts = async (page = 1): Promise<PaginatedPostsResponse> => {
-  const token = Cookies.get('access_token');
-
   const response = await api.get(endpoints.listOfPosts, {
     params: { page },
     headers: {
@@ -46,3 +45,30 @@ export const fetchPosts = async (page = 1): Promise<PaginatedPostsResponse> => {
     totalItems,
   };
 };
+
+
+export const addPost = async () => {
+  const response = await api.post(endpoints.addPost, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+  
+  });
+
+  const data = response.data;
+
+  return data;
+}
+
+export const viewPost = async (id: string) => {
+    const response = await api.get(`${endpoints.viewPost}?id=${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+  
+  });
+
+  const data = response.data;
+
+  return data;
+}

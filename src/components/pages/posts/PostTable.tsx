@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { fetchPosts, Post } from '../../shared/api/postApi';
-import { Table } from 'antd';
-import { columns } from '@/app/context';
+import { fetchPosts, Post } from '../../../shared/api/postApi';
+import { Space, Table } from 'antd';
+import { postsColumns } from '@/app/context';
 import '@ant-design/v5-patch-for-react-19';
+import { useRouter } from 'next/navigation';
 
-const PostsPage = () => {
+const PostsTable = () => {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -32,11 +34,23 @@ const PostsPage = () => {
       <Table
         title={() => 
           <div>
-            <h2 style={{textAlign: 'center'}}>Список постов</h2>
+            <h2 style={{textAlign: 'left'}}>Список постов</h2>
           </div>
         }
         showHeader={true}
-        columns={columns}
+        columns={[...postsColumns,
+          {
+              title: 'Действия',
+              key: 'actions',
+              render: (_, record) => (
+                <Space size='middle'>
+                  <a onClick={() => router.push(`/posts/detail/${record.id}`)}>Посмотреть</a>
+                  <a onClick={() => router.push(`/posts/edit/${record.id}`)}>Редактировать</a>
+                  <a>Удалить</a>
+                </Space>
+              )
+          }
+        ]}
         dataSource={posts}
         rowKey="id"
         loading={loading}
@@ -50,4 +64,4 @@ const PostsPage = () => {
   );
 };
 
-export default PostsPage;
+export default PostsTable;

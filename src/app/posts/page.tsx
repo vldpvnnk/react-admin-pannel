@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 
-const PostsPage = dynamic(() => import('@/components/pages/PostsPage'), {
+const PostsPage = dynamic(() => import('@/components/pages/posts/PostTable'), {
   ssr: false,
 });
 

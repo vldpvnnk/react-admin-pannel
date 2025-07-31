@@ -2,7 +2,7 @@
 
 import './globals.css';
 import { Providers } from './providers';
-import { Button, Layout, Menu } from 'antd';
+import { Layout, Menu } from 'antd';
 import {
   FileTextOutlined,
   UserOutlined,
@@ -10,8 +10,7 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
+import React from 'react';
 
 const { Sider, Content } = Layout;
 
@@ -24,12 +23,6 @@ const menuItems = [
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuth, setIsAuth] = useState(false);
-
-  useEffect(() => {
-    const token = Cookies.get('access_token');
-    setIsAuth(!!token);
-  }, []);
 
   const onMenuClick = (e: { key: string }) => {
     router.push(e.key);
@@ -45,25 +38,23 @@ const handleLogout = async () => {
       <body>
         <Providers>
           <Layout style={{ minHeight: '100vh' }}>
-            {isAuth && (
-              <Sider width={200} style={{ background: '#fff' }}>
-                <Menu
-                  mode="inline"
-                  selectedKeys={[pathname]}
-                  style={{ height: '100%', borderRight: 0 }}
-                  onClick={onMenuClick}
-                  items={[
-                    ...menuItems,
-                    {
-                      key: 'logout',
-                      icon: <LogoutOutlined />,
-                      label: 'Выйти',
-                      onClick: handleLogout,
-                    },
-                  ]}
-                />
-              </Sider>
-            )}
+            <Sider width={200} style={{ background: '#fff' }}>
+              <Menu
+                mode="inline"
+                selectedKeys={[pathname]}
+                style={{ height: '100%', borderRight: 0 }}
+                onClick={onMenuClick}
+                items={[
+                  ...menuItems,
+                  {
+                    key: 'logout',
+                    icon: <LogoutOutlined />,
+                    label: 'Выйти',
+                    onClick: handleLogout,
+                  },
+                ]}
+              />
+            </Sider>
             <Layout style={{ padding: '24px' }}>
               <Content style={{ background: '#fff', padding: 24, margin: 0 }}>
                 {children}
