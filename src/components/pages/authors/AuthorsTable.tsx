@@ -24,19 +24,20 @@ const AuthorsTable = () => {
 
   if (loading) return <Spin size="large" />;
   if (error) return <Alert message={error} type="error" />;
-  const handleDelete =  (id: string) => {
-    const request = async () => {
-        try{
-            const res = await deleteAuthor(id);
-            if (res) {
-                message.success("Автор удален!")
-            };
-        } catch (error){
-            console.error(error)
-        }
+const handleDelete = (id: string) => {
+  const request = async () => {
+    try {
+      await deleteAuthor(id);
+      message.success('Автор удалён!');
+      setAuthors(prev => prev.filter(author => String(author.id) !== id));
+    } catch (error) {
+      console.error(error);
+      message.error('Не удалось удалить автора');
     }
-    request();
-  }
+  };
+  request();
+};
+
   return (
     <Table
         title={() => (

@@ -11,5 +11,5 @@ export const endpoints = {
   addAuthor: '/manage/authors/add',
   detailAuthor: "/manage/authors/detail",
   editAuthor: "/manage/authors/edit",
-  deleteAuthor: "/manage/authors/delete"
+  deleteAuthor: "/manage/authors/remove"
 };
