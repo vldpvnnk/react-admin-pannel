@@ -1,3 +1,3 @@
-import EditAuthorForm from "@/features/forms/EditAuthorForm";
+import EditAuthorForm from "@/features/forms/authors/EditAuthorForm";
 
 export default EditAuthorForm;

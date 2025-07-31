@@ -1,10 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Table, Spin, Alert, Space } from 'antd';
+import { Table, Spin, Alert, Space, message, Button } from 'antd';
 import Tag from '@/entities/tag/types';
-import { fetchTags } from '@/shared/api/tagApi';
+import { deleteTag, fetchTags } from '@/shared/api/tagApi';
 import { tagsColumns } from '@/app/context';
 import { useRouter } from 'next/navigation';
+import { PlusOutlined } from '@ant-design/icons';
 
 const TagsTable = () => {
   const router = useRouter();
@@ -19,18 +20,36 @@ const TagsTable = () => {
       .catch(() => setError('Ошибка при загрузке тегов'))
       .finally(() => setLoading(false));
   }, []);
-  console.log("tags", tags)
-
+  const handleDelete = (id: string) => {
+    const request = async () => {
+      try {
+        await deleteTag(id);
+        message.success('Тег удалён!');
+        setTags(prev => prev.filter(tag => String(tag.id) !== id));
+      } catch (error) {
+        console.error(error);
+        message.error('Не удалось удалить тег');
+      }
+    };
+    request();
+  };
   if (loading) return <Spin size="large" />;
   if (error) return <Alert message={error} type="error" />;
 
   return (
     <Table
-      title={() => 
-        <div>
-          <h2 style={{textAlign: 'left'}}>Список тегов</h2>
-        </div>
-      } 
+    title={() => (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <h2 style={{ margin: 0 }}>Список тегов</h2>
+      <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => router.push('/tags/add')}
+      >
+          Добавить тег
+      </Button>
+      </div>
+  )}
       showHeader
       rowKey="id" 
       columns={[...tagsColumns, 
@@ -41,7 +60,7 @@ const TagsTable = () => {
                 <Space size='small'>
                   <a onClick={() => router.push(`/tags/detail/${record.id}`)}>Посмотреть</a>
                   <a onClick={() => router.push(`/tags/edit/${record.id}`)}>Редактировать</a>
-                  <a>Удалить</a>
+                  <a onClick={() => handleDelete(String(record.id))}>Удалить</a>
                 </Space>
           )
         }

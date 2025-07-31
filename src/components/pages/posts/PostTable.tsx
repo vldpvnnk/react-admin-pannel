@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { fetchPosts, Post } from '../../../shared/api/postApi';
-import { Space, Table } from 'antd';
+import { deletePost, fetchPosts, Post } from '../../../shared/api/postApi';
+import { Button, message, Space, Table } from 'antd';
 import { postsColumns } from '@/app/context';
 import { useRouter } from 'next/navigation';
+import { PlusOutlined } from '@ant-design/icons';
 
 const PostsTable = () => {
   const router = useRouter();
@@ -25,17 +26,37 @@ const PostsTable = () => {
     }
   };
 
+  const handleDelete = (id: string) => {
+    const request = async () => {
+      try {
+        await deletePost(id);
+        message.success('Пост удалён!');
+        setPosts(prev => prev.filter(post => String(post.id) !== id));
+      } catch (error) {
+        console.error(error);
+        message.error('Не удалось удалить пост');
+      }
+    };
+    request();
+  };
   useEffect(() => {
     loadPosts(page);
   }, [page]);
 
   return (
       <Table
-        title={() => 
-          <div>
-            <h2 style={{textAlign: 'left'}}>Список постов</h2>
+        title={() => (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0 }}>Список постов</h2>
+          <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => router.push('/posts/add')}
+          >
+              Добавить пост
+          </Button>
           </div>
-        }
+        )}
         showHeader={true}
         columns={[...postsColumns,
           {
@@ -45,7 +66,7 @@ const PostsTable = () => {
                 <Space size='middle'>
                   <a onClick={() => router.push(`/posts/detail/${record.id}`)}>Посмотреть</a>
                   <a onClick={() => router.push(`/posts/edit/${record.id}`)}>Редактировать</a>
-                  <a>Удалить</a>
+                  <a onClick={() => handleDelete(String(record.id))}>Удалить</a>
                 </Space>
               )
           }

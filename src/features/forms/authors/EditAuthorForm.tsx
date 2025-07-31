@@ -7,6 +7,7 @@ import { RcFile } from 'antd/es/upload';
 import { useParams, useRouter } from 'next/navigation';
 import { viewAuthor, updateAuthor } from '@/shared/api/authorsApi';
 import AuthorDetail from '@/entities/author/types';
+import ApiErrorResponse from '@/types';
 
 export default function EditAuthorForm() {
   const [form] = Form.useForm();
@@ -55,14 +56,6 @@ type FormValues = {
   shortDescription: string;
   description: string;
   removeAvatar: boolean;
-};
-
-type ApiErrorResponse = {
-  response?: {
-    data?: {
-      errors?: Record<string, string[] | string>;
-    };
-  };
 };
 
 const handleSubmit = async (values: FormValues): Promise<void> => {

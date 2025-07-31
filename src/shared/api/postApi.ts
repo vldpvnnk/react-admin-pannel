@@ -72,3 +72,15 @@ export const viewPost = async (id: string) => {
 
   return data;
 }
+
+export const deletePost = async (id: string) => {
+  const response = await api.delete(`${endpoints.deletePost}?id=${id}`, {
+  headers: {
+      Authorization: `Bearer ${token}`,
+  },
+});
+
+const data = response.data;
+
+return data;
+}
