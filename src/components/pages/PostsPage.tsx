@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 import { fetchPosts, Post } from '../../shared/api/postApi';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+import { Button, Table } from 'antd';
+import { columns } from '@/app/context';
 
 const PostsPage = () => {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+
+  const handleLogout = () => {
+    Cookies.remove("access_token");
+    Cookies.remove("refresh_token");
+    router.replace("/");
+  }
 
   const loadPosts = async (pageNumber: number) => {
     setLoading(true);
@@ -20,31 +31,29 @@ const PostsPage = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     loadPosts(page);
   }, [page]);
 
   return (
-    <div>
-      <h2>Список постов</h2>
-      {loading ? (
-        <p>Загрузка...</p>
-      ) : (
-        <ul>
-          {posts.map((post) => (
-            <li key={post.id}>
-              <strong>{post.title}</strong> — автор: {post.authorName}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div style={{ marginTop: '1rem' }}>
-        <button disabled={page <= 1} onClick={() => setPage(page - 1)}>Назад</button>
-        <span style={{ margin: '0 10px' }}>Страница {page} из {totalPages}</span>
-        <button disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Вперёд</button>
-      </div>
-    </div>
+      <Table
+        title={() => <div>
+                    <h2 style={{textAlign: 'center'}}>Список постов</h2>
+                    <Button onClick={handleLogout}>Выйти</Button>
+        </div>
+        }
+        showHeader={true}
+        columns={columns}
+        dataSource={posts}
+        rowKey="id"
+        loading={loading}
+        pagination={{
+          current: page,
+          total: totalPages * 10,
+          onChange: (newPage) => setPage(newPage),
+          position: ['bottomCenter']
+        }}
+      />
   );
 };
 
