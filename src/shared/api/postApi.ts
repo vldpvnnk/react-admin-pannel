@@ -23,6 +23,16 @@ export interface PaginatedPostsResponse {
   currentPage: number;
   totalItems: number;
 }
+
+export interface AddPostPayload {
+  code: string;
+  title: string;
+  authorId: number;
+  tagIds: number[];
+  text: string;
+  previewPicture?: File;
+}
+
 const token = Cookies.get('access_token');
 
 export const fetchPosts = async (page = 1): Promise<PaginatedPostsResponse> => {
@@ -46,19 +56,43 @@ export const fetchPosts = async (page = 1): Promise<PaginatedPostsResponse> => {
   };
 };
 
+export const addPost = async (payload: AddPostPayload) => {
+  const formData = new FormData();
 
-export const addPost = async () => {
-  const response = await api.post(endpoints.addPost, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-  
+  formData.append('code', payload.code);
+  formData.append('title', payload.title);
+  formData.append('authorId', payload.authorId.toString());
+  formData.append('text', payload.text);
+
+  payload.tagIds.forEach((tagId) => {
+    formData.append('tagIds[]', tagId.toString()); // массив
   });
 
-  const data = response.data;
+  if (payload.previewPicture) {
+    formData.append('previewPicture', payload.previewPicture);
+  }
 
-  return data;
-}
+  const response = await api.post(endpoints.addPost, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+};
+
+export const updatePost = async (id: string, formData: FormData) => {
+  const response = await api.post(`${endpoints.editPost}?id=${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+};
+
 
 export const viewPost = async (id: string) => {
     const response = await api.get(`${endpoints.viewPost}?id=${id}`, {

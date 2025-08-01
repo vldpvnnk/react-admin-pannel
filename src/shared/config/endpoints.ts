@@ -15,5 +15,6 @@ export const endpoints = {
   deletePost: "manage/posts/remove",
   deleteTag: "manage/tags/remove",
   addTag: "manage/tags/add",
-  editTag: "manage/tags/edit"
+  editTag: "manage/tags/edit",
+  editPost: "manage/posts/edit"
 };
