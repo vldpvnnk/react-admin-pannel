@@ -38,7 +38,7 @@ useEffect(() => {
 const items = getPostDescriptionItems(post);
   return (
     <div style={{ padding: 24 }}>
-        <Button onClick={() => router.push('/posts')}>Вернуться назад</Button>
+        <Button onClick={() => router.push('/posts')}>Назад</Button>
         <h1>Детали поста</h1>
         <Descriptions bordered column={1} items={items} />
     </div>

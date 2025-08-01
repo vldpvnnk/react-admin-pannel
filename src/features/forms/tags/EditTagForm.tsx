@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, message, Spin } from 'antd';
+import { Form, Button, message, Spin } from 'antd';
 import { useParams, useRouter } from 'next/navigation';
 import { updateTag, viewTag } from '@/shared/api/tagApi';
 import TagDetail from '@/entities/tag/types';
-import ApiErrorResponse from '@/types';
 import TagFormValues from "@/types/index"
+import TagsFormFields from './TagsFormFileds';
+import axios from 'axios';
 
 export default function EditTagForm() {
   const [form] = Form.useForm();
@@ -22,11 +23,6 @@ export default function EditTagForm() {
             try {
             const data = await viewTag(id);
             setTag(data);
-            form.setFieldsValue({
-                name: data.name,
-                code: data.code,
-                sort: Number(data.sort)
-            })
             } catch (error) {
             console.error('Ошибка при получении тега:', error);
             } finally {
@@ -34,7 +30,17 @@ export default function EditTagForm() {
             }
         };
         fetchPost();
-    }, [id, form]);
+    }, [id]);
+
+    useEffect(() => {
+      if (tag) {
+        form.setFieldsValue({
+          name: tag.name,
+          code: tag.code,
+          sort: Number(tag.sort)
+        });
+      }
+    }, [tag, form]);
 
     const handleSubmit = async (values: TagFormValues): Promise<void> => {
         if (!id) return;
@@ -46,21 +52,21 @@ export default function EditTagForm() {
           await updateTag(id, formData);
           message.success('Тег обновлён');
           router.push('/tags');
-        } catch (err: unknown) {
-          const error = err as ApiErrorResponse;
+        } catch (error) {
           console.error(error);
-          if (error?.response?.data?.errors) {
-            const apiErrors = error.response.data.errors;
-            form.setFields(
-              Object.entries(apiErrors).map(([field, messages]) => ({
-                name: field,
-                errors: Array.isArray(messages) ? messages : [String(messages)],
-              }))
-            );
+      
+          if (
+            axios.isAxiosError(error) && 
+            error.response && 
+            Array.isArray(error.response.data) &&
+            error.response.data.length > 0 &&
+            error.response.data[0].message
+          ) {
+            message.error(error.response.data[0].message);
           } else {
-            message.error('Произошла ошибка при обновлении тега');
+            message.error('Произошла ошибка при редактировании тега');
           }
-        } finally {
+        }  finally {
           setSubmitting(false);
         }
       };
@@ -70,40 +76,15 @@ export default function EditTagForm() {
     
       if (!tag) return <div>Тег не найден...</div>
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={handleSubmit}
-    >
-      <Form.Item
-        label="Название"
-        name="name"
-        rules={[{ required: true, message: 'Введите название' }]}
-        
+    <div style={{padding: 24}}>
+      <Button style={{marginBottom: 24}} onClick={() => router.push("/tags")}>Назад</Button>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
       >
-        <Input autoComplete='off'/>
-      </Form.Item>
-      <Form.Item
-        label="Код"
-        name="code"
-        rules={[{ required: true, message: 'Введите код' }]}
-        
-      >
-        <Input autoComplete='off'/>
-      </Form.Item>
-      <Form.Item
-        label="Сортировка"
-        name="sort"
-        rules={[{ required: true, message: 'Введите сортировку (число)' }]}
-        
-      >
-        <Input autoComplete='off'/>
-      </Form.Item>
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={submitting}>
-          Сохранить
-        </Button>
-      </Form.Item>
-    </Form>
+        <TagsFormFields loading={submitting}/>
+      </Form>
+    </div>
   );
 }

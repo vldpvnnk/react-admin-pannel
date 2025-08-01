@@ -15,13 +15,11 @@ export async function GET(req: NextRequest) {
   response.headers.set('Set-Cookie', [
     serialize('access_token', access_token, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
       path: '/',
       maxAge: 60 * 60 * 24,
     }),
     serialize('refresh_token', refresh_token, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
     }),

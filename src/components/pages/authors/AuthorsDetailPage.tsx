@@ -38,7 +38,7 @@ useEffect(() => {
 const items = getAuthorDescriptionItems(author);
   return (
     <div style={{ padding: 24 }}>
-        <Button onClick={() => router.push('/authors')}>Вернуться назад</Button>
+        <Button onClick={() => router.push('/authors')}>Назад</Button>
         <h1>Детали автора</h1>
         <Descriptions bordered column={1} items={items} />
     </div>

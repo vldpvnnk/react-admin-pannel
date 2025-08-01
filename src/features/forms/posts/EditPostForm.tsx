@@ -1,19 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Form, Input, Button, Select, Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { Form, Button, message } from 'antd';
 import { useParams, useRouter } from 'next/navigation';
 import type { UploadFile } from 'antd/es/upload';
-
 import Tag from '@/entities/tag/types';
 import AuthorDetail from '@/entities/author/types';
-
 import { fetchTags } from '@/shared/api/tagApi';
 import { fetchAuthors } from '@/shared/api/authorsApi';
 import { viewPost, updatePost, AddPostPayload } from '@/shared/api/postApi';
-
-const { Option } = Select;
+import PostDetail from '@/entities/post/types';
+import PostFormFields from './PostFormFields';
+import axios from 'axios';
 
 export default function EditPostForm() {
   const [form] = Form.useForm();
@@ -24,36 +22,27 @@ export default function EditPostForm() {
   const [tags, setTags] = useState<Tag[]>([]);
   const [authors, setAuthors] = useState<AuthorDetail[]>([]);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  
+  const [post, setPost] = useState<PostDetail>()
+
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
       try {
-        const postData = await viewPost(id);
-        // setPost(postData);
-  
+        const postData = await viewPost(id);  
+        setPost(postData)
         const [tagsData, authorsData] = await Promise.all([
           fetchTags(),
           fetchAuthors(),
         ]);
         setTags(tagsData);
         setAuthors(authorsData);
-  
-        form.setFieldsValue({
-          code: postData.code,
-          title: postData.title,
-          authorId: postData.author.id,
-          tagIds: postData.tags.map((tag: Tag) => tag.id),
-          text: postData.text,
-        });
-  
-        if (postData.previewPictureUrl) {
+        if (postData.previewPicture?.url) {
           setFileList([
             {
               uid: '-1', 
-              name: 'preview.jpg', 
+              name: postData.previewPicture.name || 'preview.jpg', 
               status: 'done',
-              url: postData.previewPictureUrl,
+              url: postData.previewPicture?.url,
             },
           ]);
         }
@@ -64,9 +53,31 @@ export default function EditPostForm() {
     };
   
     fetchData();
-  }, [id, form]);
+  }, [id]);
   
-  
+  useEffect(()=> {
+    if (post){
+      form.setFieldsValue({
+        code: post.code,
+        title: post.title,
+        authorId: post?.author?.id,
+        tagIds: post.tags.map((tag) => Number(tag.id)),
+        text: post.text,
+      });
+      if (post.previewPicture?.url){
+        form.setFieldsValue({
+          previewPicture: [
+            {
+              uid: '-1',
+              name: post.previewPicture.name || 'preview.jpg',
+              status: 'done',
+              url: post.previewPicture.url,
+            }
+          ]
+        });
+      }
+    }
+  },[post, form])
 
   const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
     setFileList(fileList);
@@ -76,104 +87,61 @@ export default function EditPostForm() {
     if (!id) return;
 
     const file = fileList[0]?.originFileObj;
-    const formData = new FormData();
-
-    formData.append('code', values.code);
-    formData.append('title', values.title);
-    formData.append('authorId', values.authorId.toString());
-    formData.append('text', values.text);
-
-    values.tagIds.forEach((tagId: number) => {
-      formData.append('tagIds[]', tagId.toString());
-    });
-
-    if (file) {
-      formData.append('previewPicture', file);
-    }
+    const payload: AddPostPayload = {
+      code: values.code,
+      title: values.title,
+      authorId: values.authorId,
+      tagIds: values.tagIds,
+      text: values.text,
+      previewPicture: file,
+    };
 
     try {
       setLoading(true);
-      await updatePost(id, formData);
+      await updatePost(id, payload);
       message.success('Пост успешно обновлён');
       router.push('/posts');
     } catch (error) {
       console.error(error);
+  
+      if (
+        axios.isAxiosError(error) && 
+        error.response && 
+        Array.isArray(error.response.data) &&
+        error.response.data.length > 0 &&
+        error.response.data[0].message
+      ) {
+        message.error(error.response.data[0].message);
+      } else {
+        message.error('Произошла ошибка при редактировании поста');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={handleSubmit}>
-      <Form.Item
-        name="code"
-        label="Код"
-        rules={[{ required: true, message: 'Введите код' }]}
+    <div style={{padding: 24}}>
+      <Button 
+        onClick={() => router.push('/posts')} 
+        style={{marginBottom: 24}}
       >
-        <Input autoComplete="off" />
-      </Form.Item>
-
-      <Form.Item
-        name="title"
-        label="Заголовок"
-        rules={[{ required: true, message: 'Введите заголовок' }]}
+        Назад
+      </Button>
+      <Form 
+        form={form} 
+        layout="vertical" 
+        onFinish={handleSubmit}
       >
-        <Input autoComplete="off" />
-      </Form.Item>
-
-      <Form.Item
-        name="authorId"
-        label="Автор"
-        rules={[{ required: true, message: 'Выберите автора' }]}
-      >
-        <Select placeholder="Выберите автора">
-          {authors.map((author) => (
-            <Option key={author.id} value={author.id}>
-              {author.name} {author.lastName}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      <Form.Item
-        name="tagIds"
-        label="Теги"
-        rules={[{ required: true, message: 'Выберите хотя бы один тег' }]}
-      >
-        <Select mode="multiple" placeholder="Выберите теги">
-          {tags.map((tag) => (
-            <Option key={tag.id} value={tag.id}>
-              {tag.name}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      <Form.Item
-        name="text"
-        label="Текст"
-        rules={[{ required: true, message: 'Введите текст поста' }]}
-      >
-        <Input.TextArea rows={6} />
-      </Form.Item>
-
-      <Form.Item label="Превью картинка">
-        <Upload
-          beforeUpload={() => false}
+        <PostFormFields 
+          authors={authors}
+          tags={tags}
           fileList={fileList}
-          onChange={handleUploadChange}
-          maxCount={1}
-          listType="picture"
-        >
-          <Button icon={<UploadOutlined />}>Выбрать файл</Button>
-        </Upload>
-      </Form.Item>
+          handleUploadChange={handleUploadChange}
+          loading={loading}
+        />
+      </Form>
+    </div>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Сохранить пост
-        </Button>
-      </Form.Item>
-    </Form>
   );
 }

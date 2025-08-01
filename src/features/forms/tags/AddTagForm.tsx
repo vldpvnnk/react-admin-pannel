@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Form, Input, Button, message, InputNumber } from 'antd';
+import { Form, message } from 'antd';
 import { useRouter } from 'next/navigation';
 import { addTag } from '@/shared/api/tagApi';
 import TagFormValues from "@/types/index"
+import TagsFormFields from './TagsFormFileds';
+import axios from 'axios';
 export default function AddTagForm() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -15,10 +17,21 @@ export default function AddTagForm() {
       await addTag(values);
       message.success('Тег успешно добавлен');
       router.push('/tags');
-    } catch (err) {
-      console.error(err);
-      message.error('Ошибка при добавлении тега');
-    } finally {
+    } catch (error) {
+      console.error(error);
+  
+      if (
+        axios.isAxiosError(error) && 
+        error.response && 
+        Array.isArray(error.response.data) &&
+        error.response.data.length > 0 &&
+        error.response.data[0].message
+      ) {
+        message.error(error.response.data[0].message);
+      } else {
+        message.error('Произошла ошибка при добавлении тега');
+      }
+    }  finally {
       setLoading(false);
     }
   };
@@ -29,34 +42,7 @@ export default function AddTagForm() {
       layout="vertical"
       onFinish={handleSubmit}
     >
-      <Form.Item
-        label="Название"
-        name="name"
-        rules={[{ required: true, message: 'Введите название' }]}
-        
-      >
-        <Input autoComplete='off'/>
-      </Form.Item>
-      <Form.Item
-        label="Код"
-        name="code"
-        rules={[{ required: true, message: 'Введите код' }]}
-        
-      >
-        <Input autoComplete='off'/>
-      </Form.Item>
-      <Form.Item
-        label="Сортировка"
-        name="sort"
-        rules={[{ required: true, message: 'Введите сортировку (число)' }]}
-      >
-        <InputNumber style={{ width: '100%' }} min={0} />
-      </Form.Item>
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Сохранить
-        </Button>
-      </Form.Item>
+      <TagsFormFields loading={loading}/>
     </Form>
   );
 }

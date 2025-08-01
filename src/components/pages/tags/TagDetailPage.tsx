@@ -41,7 +41,7 @@ export default function TagDetailPage() {
         <Button 
             onClick={() => router.push('/tags')}
         >
-            Вернуться назад
+            Назад
         </Button>
         <h1>Детали тега</h1>
         <Descriptions 

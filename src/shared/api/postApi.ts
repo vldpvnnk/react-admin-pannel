@@ -65,7 +65,7 @@ export const addPost = async (payload: AddPostPayload) => {
   formData.append('text', payload.text);
 
   payload.tagIds.forEach((tagId) => {
-    formData.append('tagIds[]', tagId.toString()); // массив
+    formData.append('tagIds[]', tagId.toString());
   });
 
   if (payload.previewPicture) {
@@ -82,7 +82,7 @@ export const addPost = async (payload: AddPostPayload) => {
   return response.data;
 };
 
-export const updatePost = async (id: string, formData: FormData) => {
+export const updatePost = async (id: string, formData: AddPostPayload) => {
   const response = await api.post(`${endpoints.editPost}?id=${id}`, formData, {
     headers: {
       Authorization: `Bearer ${token}`,

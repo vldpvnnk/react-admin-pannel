@@ -1,27 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Form, Input, Button, Upload, Switch, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import { RcFile } from 'antd/es/upload';
+import { Form, message } from 'antd';
 import { useRouter } from 'next/navigation';
 import { addAuthor } from '@/shared/api/authorsApi';
+import AuthorsFormFields from './AuthorsFormFields';
+import AuthorFormValues from "@/types"
+import axios from 'axios';
 
 export default function AddAuthorForm() {
   const [form] = Form.useForm();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-type FormValues = {
-  name: string;
-  lastName: string;
-  secondName: string;
-  shortDescription: string;
-  description: string;
-  removeAvatar: boolean;
-};
-
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: AuthorFormValues) => {
     try {
       setLoading(true);
       await addAuthor({
@@ -31,10 +23,21 @@ type FormValues = {
       });
       message.success('Автор успешно добавлен');
       router.push('/authors');
-    } catch (err) {
-      console.error(err);
-      message.error('Ошибка при добавлении автора');
-    } finally {
+    } catch (error) {
+      console.error(error);
+  
+      if (
+        axios.isAxiosError(error) && 
+        error.response && 
+        Array.isArray(error.response.data) &&
+        error.response.data.length > 0 &&
+        error.response.data[0].message
+      ) {
+        message.error(error.response.data[0].message);
+      } else {
+        message.error('Произошла ошибка при добавлении автора');
+      }
+    }  finally {
       setLoading(false);
     }
   };
@@ -48,69 +51,10 @@ type FormValues = {
         removeAvatar: false,
       }}
     >
-      <Form.Item
-        label="Имя"
-        name="name"
-        rules={[{ required: true, message: 'Введите имя' }]}
-        
-      >
-        <Input autoComplete='off'/>
-      </Form.Item>
-
-      <Form.Item
-        label="Фамилия"
-        name="lastName"
-        rules={[{ required: true, message: 'Введите фамилию' }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        label="Отчество"
-        name="secondName"
-        rules={[{ required: true, message: 'Введите отчество' }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        label="Краткое описание"
-        name="shortDescription"
-        rules={[{ required: true, message: 'Введите краткое описание' }]}
-      >
-        <Input.TextArea />
-      </Form.Item>
-
-      <Form.Item
-        label="Полное описание"
-        name="description"
-        rules={[{ required: true, message: 'Введите описание' }]}
-      >
-        <Input.TextArea rows={4} />
-      </Form.Item>
-
-      <Form.Item label="Аватар">
-        <Upload
-          beforeUpload={(file: RcFile) => {
-            setAvatarFile(file);
-            return false;
-          }}
-          onRemove={() => setAvatarFile(null)}
-          maxCount={1}
-        >
-          <Button icon={<UploadOutlined />}>Загрузить</Button>
-        </Upload>
-      </Form.Item>
-
-      <Form.Item label="Удалить аватар" name="removeAvatar" valuePropName="checked">
-        <Switch />
-      </Form.Item>
-
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Сохранить
-        </Button>
-      </Form.Item>
+      <AuthorsFormFields 
+        loading={loading} 
+        setAvatarFile={setAvatarFile}
+      />
     </Form>
   );
 }

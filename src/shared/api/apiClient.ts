@@ -22,7 +22,7 @@ api.interceptors.response.use(
   }
 );
 
-async function handleRefresh(originalError: AxiosError): Promise<AxiosResponse>  {
+async function handleRefresh(originalError: AxiosError): Promise<AxiosResponse> {
   try {
     const refresh = Cookies.get('refresh_token');
     if (!refresh) throw new Error('No refresh token');
@@ -33,16 +33,19 @@ async function handleRefresh(originalError: AxiosError): Promise<AxiosResponse> 
     );
 
     const data = resp.data;
+
     Cookies.set('access_token', data.access_token);
     Cookies.set('refresh_token', data.refresh_token);
+
+    await fetch(`/api/set-token?access_token=${data.access_token}&refresh_token=${data.refresh_token}`);
 
     const config = originalError.config as AxiosRequestConfig;
     if (!config.headers) config.headers = {};
     config.headers['Authorization'] = `Bearer ${data.access_token}`;
 
-    return axios(config);
+    return api(config);
   } catch (e) {
-    window.location.href = '/';
+    window.location.href = '/login';
     return Promise.reject(e);
   }
 }

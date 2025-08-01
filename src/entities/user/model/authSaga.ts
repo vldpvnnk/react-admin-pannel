@@ -12,8 +12,8 @@ function* loginWorker(
     formData.append('email', action.payload.email);
     formData.append('password', action.payload.password);
 
-    const response = yield call(api.post, endpoints.auth, formData);
-    const data = response.data as AuthTokens;
+    const response = (yield call(api.post, endpoints.auth, formData)) as { data: AuthTokens };
+    const data = response.data;
 
     if (typeof window !== 'undefined') {
       window.location.href = `/api/set-token?access_token=${data.access_token}&refresh_token=${data.refresh_token}`;
